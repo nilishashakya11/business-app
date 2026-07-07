@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 
 export interface BranchOption {
   id: string;
@@ -16,7 +17,12 @@ interface BranchContextValue {
 
 const BranchContext = React.createContext<BranchContextValue | null>(null);
 
-const STORAGE_KEY = "gng.activeBranch";
+export const BRANCH_COOKIE = "gng.activeBranch";
+
+function writeCookie(id: string) {
+  // One-year cookie so server components can read the active branch.
+  document.cookie = `${BRANCH_COOKIE}=${id}; path=/; max-age=31536000; samesite=lax`;
+}
 
 export function BranchProvider({
   branches,
@@ -27,22 +33,20 @@ export function BranchProvider({
   defaultBranchId: string | null;
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const [activeBranchId, setActive] = React.useState<string | null>(
     defaultBranchId ?? branches[0]?.id ?? null,
   );
 
-  // Restore last selection from localStorage if it is still a valid branch.
-  React.useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored && branches.some((b) => b.id === stored)) {
-      setActive(stored);
-    }
-  }, [branches]);
-
-  const setActiveBranchId = React.useCallback((id: string) => {
-    setActive(id);
-    window.localStorage.setItem(STORAGE_KEY, id);
-  }, []);
+  const setActiveBranchId = React.useCallback(
+    (id: string) => {
+      setActive(id);
+      writeCookie(id);
+      // Re-render server components so data reflects the new branch.
+      router.refresh();
+    },
+    [router],
+  );
 
   const value = React.useMemo<BranchContextValue>(
     () => ({
