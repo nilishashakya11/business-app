@@ -45,3 +45,5 @@ next-env.d.ts
 !.vscode/extensions.json
 
 .claude/
+# local dev server log
+devserver.log

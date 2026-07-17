@@ -19,10 +19,10 @@ export function formatCurrency(amount: number | string, currency = "NPR") {
 /** Format a date for display. */
 export function formatDate(date: Date | string, opts?: Intl.DateTimeFormatOptions) {
   const d = typeof date === "string" ? new Date(date) : date;
-  return new Intl.DateTimeFormat("en-NP", {
-    dateStyle: "medium",
-    ...opts,
-  }).format(d);
+  // `dateStyle` can't be combined with individual component options (weekday,
+  // day, month, ...) — Intl throws. Only apply the default when no opts given.
+  const options: Intl.DateTimeFormatOptions = opts ?? { dateStyle: "medium" };
+  return new Intl.DateTimeFormat("en-NP", options).format(d);
 }
 
 /** Format a time (HH:mm). */
