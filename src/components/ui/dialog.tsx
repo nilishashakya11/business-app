@@ -58,7 +58,14 @@ function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
+      className={cn(
+        // Pin the actions to the bottom of the (scrollable) dialog so they're
+        // never scrolled out of view on long forms. The negative margins let the
+        // bar span the full width of DialogContent's p-6 padding; the border and
+        // solid background separate it from content scrolling underneath.
+        "sticky bottom-0 z-10 -mx-6 -mb-6 mt-2 flex flex-col-reverse gap-2 border-t bg-card px-6 pb-6 pt-4 sm:flex-row sm:justify-end",
+        className,
+      )}
       {...props}
     />
   );
