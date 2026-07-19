@@ -143,6 +143,12 @@ export const productSchema = z.object({
   unit: z.string().default("pcs"),
 });
 
+export const stockAdjustmentSchema = z.object({
+  quantity: z.coerce.number().int().refine((n) => n !== 0, "Enter a non-zero amount"),
+  type: z.enum(["PURCHASE", "ADJUSTMENT", "RETURN", "CONSUMPTION"]).default("ADJUSTMENT"),
+  reason: z.string().optional(),
+});
+
 export const supplierSchema = z.object({
   name: z.string().min(1),
   contact: z.string().optional(),
@@ -165,3 +171,4 @@ export type AppointmentInput = z.infer<typeof appointmentSchema>;
 export type StaffInput = z.infer<typeof staffSchema>;
 export type InvoiceInput = z.infer<typeof invoiceSchema>;
 export type ProductInput = z.infer<typeof productSchema>;
+export type StockAdjustmentInput = z.infer<typeof stockAdjustmentSchema>;
