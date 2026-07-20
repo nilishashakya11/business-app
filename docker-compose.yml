@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: business-app-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: business_app
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d business_app"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: business-app-web
+    restart: unless-stopped
+    # Behind a profile so `docker compose up` starts only the DB by default.
+    # Run the full stack in Docker with: docker compose --profile app up
+    profiles: ["app"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Inside the compose network the DB host is the service name "db".
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/business_app?schema=public"
+      DIRECT_URL: "postgresql://postgres:postgres@db:5432/business_app?schema=public"
+      NEXTAUTH_SECRET: "dev-secret-change-me-please-32chars-min"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      NODE_ENV: "development"
+    ports:
+      - "3000:3000"
+    # Dev-friendly: sync schema, seed, then start Next in dev mode.
+    command: sh -c "npx prisma db push --skip-generate && npm run db:seed && npm run dev"
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+      - ./public:/app/public
+
+volumes:
+  db-data:
