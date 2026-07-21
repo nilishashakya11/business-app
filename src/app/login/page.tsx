@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { LoginForm } from "./login-form";
 import { CalendarCheck, TrendingUp, Users } from "lucide-react";
 
@@ -70,7 +71,9 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <LoginForm />
+          <Suspense fallback={<div className="h-64" />}>
+            <LoginForm />
+          </Suspense>
         </div>
       </section>
     </main>
