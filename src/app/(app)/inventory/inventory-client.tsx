@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Package, Pencil, ArrowUpDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatCurrency } from "@/lib/utils";
-import { ProductDialog, type ProductRecord } from "./product-dialog";
+import { type ProductRecord } from "./product-form";
 import { StockDialog } from "./stock-dialog";
 
 export interface ProductListItem extends ProductRecord {
@@ -24,10 +25,9 @@ export function InventoryClient({
   branchId: string | null;
   canManage: boolean;
 }) {
+  const router = useRouter();
   const [query, setQuery] = React.useState("");
-  const [productOpen, setProductOpen] = React.useState(false);
   const [stockOpen, setStockOpen] = React.useState(false);
-  const [editing, setEditing] = React.useState<ProductRecord | null>(null);
   const [stockTarget, setStockTarget] = React.useState<ProductListItem | null>(null);
 
   const filtered = React.useMemo(() => {
@@ -41,12 +41,10 @@ export function InventoryClient({
   const lowCount = products.filter((p) => p.quantity <= p.lowStockLevel).length;
 
   function openNew() {
-    setEditing(null);
-    setProductOpen(true);
+    router.push("/inventory/new");
   }
   function openEdit(p: ProductListItem) {
-    setEditing(p);
-    setProductOpen(true);
+    router.push(`/inventory/${p.id}/edit`);
   }
   function openStock(p: ProductListItem) {
     setStockTarget(p);
@@ -186,12 +184,6 @@ export function InventoryClient({
         </Card>
       )}
 
-      <ProductDialog
-        open={productOpen}
-        onOpenChange={setProductOpen}
-        branchId={branchId}
-        product={editing}
-      />
       <StockDialog open={stockOpen} onOpenChange={setStockOpen} product={stockTarget} />
     </div>
   );

@@ -16,6 +16,16 @@ export function formatCurrency(amount: number | string, currency = "NPR") {
   }).format(Number.isFinite(value) ? value : 0);
 }
 
+/**
+ * Format a Date as a local `YYYY-MM-DD` string. Unlike
+ * `toISOString().slice(0, 10)`, this uses local calendar parts, so it never
+ * shifts to the adjacent day in timezones offset from UTC (e.g. en-NP, +5:45).
+ */
+export function toDateInput(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 /** Format a date for display. */
 export function formatDate(date: Date | string, opts?: Intl.DateTimeFormatOptions) {
   const d = typeof date === "string" ? new Date(date) : date;

@@ -14,16 +14,13 @@ export default async function ServicesPage() {
 
   const { branchId } = await resolveActiveBranch(ctx);
 
-  const [services, categories] = await Promise.all([
-    branchId
-      ? prisma.service.findMany({
-          where: { branchId },
-          orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
-          include: { category: { select: { id: true, name: true } } },
-        })
-      : Promise.resolve([]),
-    prisma.serviceCategory.findMany({ orderBy: { sortOrder: "asc" } }),
-  ]);
+  const services = branchId
+    ? await prisma.service.findMany({
+        where: { branchId },
+        orderBy: [{ category: { sortOrder: "asc" } }, { name: "asc" }],
+        include: { category: { select: { id: true, name: true } } },
+      })
+    : [];
 
   const list: ServiceListItem[] = services.map((s) => ({
     id: s.id,
@@ -45,7 +42,6 @@ export default async function ServicesPage() {
       />
       <ServicesClient
         services={list}
-        categories={categories.map((c) => ({ id: c.id, name: c.name }))}
         branchId={branchId}
         canManage={ctx.permissions.includes(PERMISSIONS.SERVICE_MANAGE)}
       />

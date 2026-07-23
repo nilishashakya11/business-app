@@ -4,6 +4,7 @@ import { resolveActiveBranch } from "@/lib/branch";
 import { prisma } from "@/lib/prisma";
 import { PERMISSIONS } from "@/lib/rbac";
 import { PageHeader } from "@/components/shell/page-header";
+import { toDateInput } from "@/lib/utils";
 import { CalendarClient, type CalendarAppointment } from "./calendar-client";
 
 export const metadata = { title: "Calendar — Glow & Go" };
@@ -22,7 +23,7 @@ export default async function CalendarPage({
   const { date } = await searchParams;
 
   // Default to today; normalise to the local day window.
-  const dayStr = date ?? new Date().toISOString().slice(0, 10);
+  const dayStr = date ?? toDateInput(new Date());
   const dayStart = new Date(dayStr + "T00:00:00");
   const dayEnd = new Date(dayStr + "T23:59:59.999");
 

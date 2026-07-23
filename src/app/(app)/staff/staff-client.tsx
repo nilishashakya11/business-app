@@ -1,13 +1,13 @@
 "use client";
 
-import * as React from "react";
 import { Plus, UsersRound, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useRouter } from "next/navigation";
 import { initials } from "@/lib/utils";
-import { StaffDialog, type StaffRecord } from "./staff-dialog";
+import { type StaffRecord } from "./staff-form";
 
 export interface StaffListItem extends StaffRecord {
   isActive: boolean;
@@ -29,17 +29,14 @@ export function StaffClient({
   branchId: string | null;
   canManage: boolean;
 }) {
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editing, setEditing] = React.useState<StaffRecord | null>(null);
+  const router = useRouter();
 
   function openNew() {
-    setEditing(null);
-    setDialogOpen(true);
+    router.push("/staff/new");
   }
 
   function openEdit(s: StaffListItem) {
-    setEditing(s);
-    setDialogOpen(true);
+    router.push(`/staff/${s.id}/edit`);
   }
 
   if (!branchId) {
@@ -122,12 +119,6 @@ export function StaffClient({
         </div>
       )}
 
-      <StaffDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        staff={editing}
-        branchId={branchId}
-      />
     </div>
   );
 }

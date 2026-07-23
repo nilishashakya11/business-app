@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/appointments/status-badge";
-import { cn, formatTime, formatDate } from "@/lib/utils";
+import { cn, formatTime, formatDate, toDateInput } from "@/lib/utils";
 import {
   AppointmentDialog,
   type ServiceOption,
@@ -64,8 +64,7 @@ export function CalendarClient({
   function shiftDay(delta: number) {
     const next = new Date(current);
     next.setDate(next.getDate() + delta);
-    const iso = next.toISOString().slice(0, 10);
-    router.push(`/calendar?date=${iso}`);
+    router.push(`/calendar?date=${toDateInput(next)}`);
   }
 
   function openNewAt(hour: number) {
@@ -95,7 +94,7 @@ export function CalendarClient({
     [],
   );
 
-  const isToday = new Date().toISOString().slice(0, 10) === date;
+  const isToday = toDateInput(new Date()) === date;
 
   function positionFor(appt: CalendarAppointment) {
     const start = new Date(appt.startTime);

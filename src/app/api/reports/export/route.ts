@@ -3,6 +3,7 @@ import { requirePermission, handle } from "@/lib/api-auth";
 import { PERMISSIONS } from "@/lib/rbac";
 import { resolveActiveBranch } from "@/lib/branch";
 import { getReportsData } from "@/lib/queries/reports";
+import { toDateInput } from "@/lib/utils";
 import { parseISO, isValid } from "date-fns";
 
 /**
@@ -29,7 +30,7 @@ export const GET = handle(async (req: NextRequest) => {
   const headers = ["Invoice", "Date", "Customer", "Items", "Subtotal", "Discount", "Tax", "Total", "Status"];
   const rows = data.sales.map((s) => [
     s.invoiceNumber,
-    s.date.toISOString().slice(0, 10),
+    toDateInput(s.date),
     s.customer,
     s.items,
     s.subtotal.toFixed(2),

@@ -17,8 +17,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EmptyState } from "@/components/ui/empty-state";
-import { CustomerDialog, type CustomerRecord } from "./customer-dialog";
 import { initials } from "@/lib/utils";
+
+export interface CustomerRecord {
+  id: string;
+  firstName: string;
+  lastName: string | null;
+  email: string | null;
+  phone: string | null;
+  gender: string | null;
+  address: string | null;
+  notes: string | null;
+}
 
 export interface CustomerListItem extends CustomerRecord {
   loyaltyPoints: number;
@@ -34,8 +44,6 @@ export function CustomersClient({
 }) {
   const router = useRouter();
   const [query, setQuery] = React.useState("");
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editing, setEditing] = React.useState<CustomerRecord | null>(null);
 
   // Client-side filter over the loaded set; server search backs the initial load.
   const filtered = React.useMemo(() => {
@@ -49,8 +57,7 @@ export function CustomersClient({
   }, [query, initialCustomers]);
 
   function openNew() {
-    setEditing(null);
-    setDialogOpen(true);
+    router.push("/customers/new");
   }
 
   return (
@@ -157,7 +164,6 @@ export function CustomersClient({
         </Card>
       )}
 
-      <CustomerDialog open={dialogOpen} onOpenChange={setDialogOpen} customer={editing} />
     </div>
   );
 }

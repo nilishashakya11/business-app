@@ -1,17 +1,14 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Sparkles, Clock, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatCurrency } from "@/lib/utils";
-import {
-  ServiceDialog,
-  type ServiceRecord,
-  type CategoryOption,
-} from "./service-dialog";
+import { type ServiceRecord, type CategoryOption } from "./service-form";
 
 export interface ServiceListItem extends ServiceRecord {
   category: { id: string; name: string } | null;
@@ -19,17 +16,14 @@ export interface ServiceListItem extends ServiceRecord {
 
 export function ServicesClient({
   services,
-  categories,
   branchId,
   canManage,
 }: {
   services: ServiceListItem[];
-  categories: CategoryOption[];
   branchId: string | null;
   canManage: boolean;
 }) {
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editing, setEditing] = React.useState<ServiceRecord | null>(null);
+  const router = useRouter();
 
   // Group services by category name for display.
   const grouped = React.useMemo(() => {
@@ -43,13 +37,11 @@ export function ServicesClient({
   }, [services]);
 
   function openNew() {
-    setEditing(null);
-    setDialogOpen(true);
+    router.push("/services/new");
   }
 
   function openEdit(s: ServiceListItem) {
-    setEditing(s);
-    setDialogOpen(true);
+    router.push(`/services/${s.id}/edit`);
   }
 
   if (!branchId) {
@@ -135,13 +127,6 @@ export function ServicesClient({
         ))
       )}
 
-      <ServiceDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        service={editing}
-        branchId={branchId}
-        categories={categories}
-      />
     </div>
   );
 }
