@@ -8,13 +8,6 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/appointments/status-badge";
 import { cn, formatTime, formatDate, toDateInput } from "@/lib/utils";
-import {
-  AppointmentDialog,
-  type ServiceOption,
-  type StaffOption,
-  type CustomerOption,
-  type AppointmentEditable,
-} from "./appointment-dialog";
 
 export interface CalendarAppointment {
   id: string;
@@ -38,27 +31,15 @@ const HOUR_PX = 64;
 export function CalendarClient({
   date,
   appointments,
-  services,
-  staff,
-  customers,
   branchId,
   canCreate,
-  canDelete,
 }: {
   date: string; // YYYY-MM-DD
   appointments: CalendarAppointment[];
-  services: ServiceOption[];
-  staff: StaffOption[];
-  customers: CustomerOption[];
   branchId: string | null;
   canCreate: boolean;
-  canDelete: boolean;
 }) {
   const router = useRouter();
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editing, setEditing] = React.useState<AppointmentEditable | null>(null);
-  const [defaultStart, setDefaultStart] = React.useState<Date | null>(null);
-
   const current = React.useMemo(() => new Date(date + "T00:00:00"), [date]);
 
   function shiftDay(delta: number) {
@@ -71,22 +52,12 @@ export function CalendarClient({
     if (!canCreate) return;
     const start = new Date(current);
     start.setHours(hour, 0, 0, 0);
-    setEditing(null);
-    setDefaultStart(start);
-    setDialogOpen(true);
+    const iso = start.toISOString();
+    router.push(`/calendar/new?start=${encodeURIComponent(iso)}&date=${date}`);
   }
 
   function openEdit(appt: CalendarAppointment) {
-    setEditing({
-      id: appt.id,
-      customerId: appt.customerId,
-      staffId: appt.staffId,
-      startTime: appt.startTime,
-      notes: appt.notes,
-      serviceIds: appt.serviceIds,
-    });
-    setDefaultStart(null);
-    setDialogOpen(true);
+    router.push(`/calendar/${appt.id}/edit`);
   }
 
   const hours = React.useMemo(
@@ -221,20 +192,6 @@ export function CalendarClient({
           </div>
         </div>
       </Card>
-
-      {branchId && (
-        <AppointmentDialog
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          branchId={branchId}
-          services={services}
-          staff={staff}
-          customers={customers}
-          appointment={editing}
-          defaultStart={defaultStart}
-          canDelete={canDelete}
-        />
-      )}
     </div>
   );
 }

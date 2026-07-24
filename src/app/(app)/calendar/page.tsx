@@ -37,42 +37,21 @@ export default async function CalendarPage({
     staffFilter = me?.id ?? "__none__";
   }
 
-  const [appointments, services, staff, customers] = await Promise.all([
-    branchId
-      ? prisma.appointment.findMany({
-          where: {
-            branchId,
-            startTime: { gte: dayStart, lte: dayEnd },
-            ...(staffFilter ? { staffId: staffFilter } : {}),
-          },
-          orderBy: { startTime: "asc" },
-          include: {
-            customer: { select: { firstName: true, lastName: true } },
-            staff: { select: { color: true, user: { select: { name: true } } } },
-            services: { include: { service: { select: { name: true } } } },
-          },
-        })
-      : Promise.resolve([]),
-    branchId
-      ? prisma.service.findMany({
-          where: { branchId, isActive: true },
-          orderBy: { name: "asc" },
-          select: { id: true, name: true, durationMinutes: true, price: true },
-        })
-      : Promise.resolve([]),
-    branchId
-      ? prisma.staff.findMany({
-          where: { branchId, user: { isActive: true } },
-          orderBy: { user: { name: "asc" } },
-          select: { id: true, user: { select: { name: true } } },
-        })
-      : Promise.resolve([]),
-    prisma.customer.findMany({
-      orderBy: { firstName: "asc" },
-      take: 500,
-      select: { id: true, firstName: true, lastName: true },
-    }),
-  ]);
+  const appointments = branchId
+    ? await prisma.appointment.findMany({
+        where: {
+          branchId,
+          startTime: { gte: dayStart, lte: dayEnd },
+          ...(staffFilter ? { staffId: staffFilter } : {}),
+        },
+        orderBy: { startTime: "asc" },
+        include: {
+          customer: { select: { firstName: true, lastName: true } },
+          staff: { select: { color: true, user: { select: { name: true } } } },
+          services: { include: { service: { select: { name: true } } } },
+        },
+      })
+    : [];
 
   const list: CalendarAppointment[] = appointments.map((a) => ({
     id: a.id,
@@ -100,20 +79,8 @@ export default async function CalendarPage({
       <CalendarClient
         date={dayStr}
         appointments={list}
-        services={services.map((s) => ({
-          id: s.id,
-          name: s.name,
-          durationMinutes: s.durationMinutes,
-          price: Number(s.price),
-        }))}
-        staff={staff.map((s) => ({ id: s.id, name: s.user.name }))}
-        customers={customers.map((c) => ({
-          id: c.id,
-          name: `${c.firstName} ${c.lastName ?? ""}`.trim(),
-        }))}
         branchId={branchId}
         canCreate={ctx.permissions.includes(PERMISSIONS.APPOINTMENT_CREATE)}
-        canDelete={ctx.permissions.includes(PERMISSIONS.APPOINTMENT_DELETE)}
       />
     </div>
   );
