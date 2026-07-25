@@ -1,24 +1,38 @@
 import type { Metadata } from "next";
-import { Outfit, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
-const sans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
+// Fonts are self-hosted (see src/app/fonts) so builds never depend on
+// fetching from Google Fonts at build time.
+const sans = localFont({
   variable: "--font-sans",
   display: "swap",
+  src: [
+    { path: "./fonts/PlusJakartaSans-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/PlusJakartaSans-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/PlusJakartaSans-600.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/PlusJakartaSans-700.woff2", weight: "700", style: "normal" },
+  ],
 });
 
-const display = Outfit({
-  subsets: ["latin"],
+const display = localFont({
   variable: "--font-display",
   display: "swap",
+  src: [
+    { path: "./fonts/Outfit-500.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/Outfit-600.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/Outfit-700.woff2", weight: "700", style: "normal" },
+  ],
 });
 
-const mono = JetBrains_Mono({
-  subsets: ["latin"],
+const mono = localFont({
   variable: "--font-mono",
   display: "swap",
+  src: [
+    { path: "./fonts/JetBrainsMono-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/JetBrainsMono-500.woff2", weight: "500", style: "normal" },
+  ],
 });
 
 export const metadata: Metadata = {
