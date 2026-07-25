@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatCurrency } from "@/lib/utils";
-import { type ServiceRecord, type CategoryOption } from "./service-form";
+import { type ServiceRecord } from "./service-form";
 
 export interface ServiceListItem extends ServiceRecord {
   category: { id: string; name: string } | null;

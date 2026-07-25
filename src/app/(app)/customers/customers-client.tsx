@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Users, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -171,7 +171,7 @@ export function ServiceForm({
           <div>
             <p className="text-sm font-medium">Active</p>
             <p className="text-xs text-muted-foreground">
-              Inactive services can't be booked or billed.
+              Inactive services can&apos;t be booked or billed.
             </p>
           </div>
           <Switch checked={isActive} onCheckedChange={(v) => setValue("isActive", v)} />
