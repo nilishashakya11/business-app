@@ -4,57 +4,58 @@
 
 @layer base {
   :root {
-    /* Neutral zinc base + single desaturated emerald accent */
-    --background: 240 6% 97%;
-    --foreground: 240 10% 12%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 12%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 12%;
-    --primary: 158 64% 38%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 5% 94%;
-    --secondary-foreground: 240 10% 18%;
-    --muted: 240 5% 94%;
-    --muted-foreground: 240 4% 46%;
-    --accent: 158 40% 92%;
-    --accent-foreground: 158 64% 24%;
-    --destructive: 0 72% 48%;
-    --destructive-foreground: 0 0% 100%;
-    --success: 158 64% 38%;
-    --success-foreground: 0 0% 100%;
-    --warning: 32 90% 48%;
-    --warning-foreground: 0 0% 100%;
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 158 64% 38%;
+    /* Warm earth-tone base: soft cream, taupe, camel, espresso */
+    --background: 40 33% 96%;
+    --foreground: 30 20% 14%;
+    --card: 40 40% 99%;
+    --card-foreground: 30 20% 14%;
+    --popover: 40 40% 99%;
+    --popover-foreground: 30 20% 14%;
+    --primary: 30 28% 40%;
+    --primary-foreground: 40 40% 97%;
+    --secondary: 40 25% 92%;
+    --secondary-foreground: 30 22% 22%;
+    --muted: 40 25% 92%;
+    --muted-foreground: 30 12% 44%;
+    --accent: 38 30% 88%;
+    --accent-foreground: 30 28% 30%;
+    --destructive: 8 58% 45%;
+    --destructive-foreground: 40 40% 97%;
+    --success: 130 22% 36%;
+    --success-foreground: 40 40% 97%;
+    --warning: 32 70% 42%;
+    --warning-foreground: 40 40% 97%;
+    --border: 35 22% 87%;
+    --input: 35 22% 87%;
+    --ring: 30 28% 40%;
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 240 10% 8%;
-    --foreground: 240 6% 94%;
-    --card: 240 9% 11%;
-    --card-foreground: 240 6% 94%;
-    --popover: 240 9% 11%;
-    --popover-foreground: 240 6% 94%;
-    --primary: 158 58% 46%;
-    --primary-foreground: 240 10% 8%;
-    --secondary: 240 6% 16%;
-    --secondary-foreground: 240 6% 94%;
-    --muted: 240 6% 16%;
-    --muted-foreground: 240 5% 60%;
-    --accent: 158 30% 18%;
-    --accent-foreground: 158 58% 70%;
-    --destructive: 0 63% 50%;
-    --destructive-foreground: 0 0% 100%;
-    --success: 158 58% 46%;
-    --success-foreground: 240 10% 8%;
-    --warning: 32 90% 52%;
-    --warning-foreground: 240 10% 8%;
-    --border: 240 6% 20%;
-    --input: 240 6% 20%;
-    --ring: 158 58% 46%;
+    /* Espresso dark: warm charcoal-brown with camel accents */
+    --background: 28 22% 9%;
+    --foreground: 40 25% 92%;
+    --card: 30 18% 12%;
+    --card-foreground: 40 25% 92%;
+    --popover: 30 18% 12%;
+    --popover-foreground: 40 25% 92%;
+    --primary: 34 34% 62%;
+    --primary-foreground: 28 25% 12%;
+    --secondary: 30 15% 18%;
+    --secondary-foreground: 40 25% 92%;
+    --muted: 30 15% 18%;
+    --muted-foreground: 35 15% 64%;
+    --accent: 32 20% 22%;
+    --accent-foreground: 38 30% 82%;
+    --destructive: 8 55% 52%;
+    --destructive-foreground: 40 40% 97%;
+    --success: 130 24% 48%;
+    --success-foreground: 28 25% 10%;
+    --warning: 34 60% 52%;
+    --warning-foreground: 28 25% 10%;
+    --border: 30 15% 22%;
+    --input: 30 15% 22%;
+    --ring: 34 34% 62%;
   }
 }
 

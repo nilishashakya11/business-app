@@ -21,17 +21,17 @@ const TOOLTIP_STYLE = {
   fontSize: 12,
 };
 
-/** A desaturated, single-hue-family palette for categorical charts. */
+/** Warm earth-tone categorical palette (camel, clay, olive, terracotta, sand). */
 const PALETTE = [
   "hsl(var(--primary))",
-  "#0ea5e9",
-  "#14b8a6",
-  "#f59e0b",
-  "#f43f5e",
-  "#8b5cf6",
-  "#64748b",
-  "#22c55e",
-  "#ec4899",
+  "#a8754e", // clay
+  "#7d8b5a", // olive
+  "#c08552", // camel
+  "#9c5a3c", // terracotta
+  "#b89b72", // sand
+  "#6f5643", // espresso
+  "#8a9a5b", // moss
+  "#cb974f", // ochre
 ];
 
 export function RevenueByMonthChart({ data }: { data: { label: string; revenue: number }[] }) {
