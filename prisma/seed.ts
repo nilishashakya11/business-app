@@ -32,6 +32,7 @@ async function main() {
   await prisma.$transaction([
     prisma.auditLog.deleteMany(),
     prisma.notification.deleteMany(),
+    prisma.review.deleteMany(),
     prisma.commission.deleteMany(),
     prisma.refund.deleteMany(),
     prisma.payment.deleteMany(),
@@ -262,6 +263,8 @@ async function main() {
 
   let invoiceCounter = 1;
   let apptCount = 0;
+  // Track completed appointments so we can seed reviews for some of them.
+  const completedForReview: { apptId: string; staffId: string; serviceId: string; customerId: string; end: Date }[] = [];
 
   for (let day = 60; day >= 0; day--) {
     // 2-5 appointments per day
@@ -302,10 +305,17 @@ async function main() {
 
       // Only completed appointments generate paid invoices
       if (status === AppointmentStatus.COMPLETED) {
+        completedForReview.push({
+          apptId: appt.id,
+          staffId: sr.staff.id,
+          serviceId: svc.id,
+          customerId: customer.id,
+          end,
+        });
         const price = Number(svc.price);
-        const taxRate = 13;
-        const taxTotal = Math.round(price * (taxRate / 100) * 100) / 100;
-        const total = price + taxTotal;
+        // Checkout charges exactly the listed price — no tax added.
+        const taxTotal = 0;
+        const total = price;
 
         const invoice = await prisma.invoice.create({
           data: {
@@ -329,7 +339,7 @@ async function main() {
                 staffId: sr.staff.id,
                 quantity: 1,
                 unitPrice: price,
-                taxRate,
+                taxRate: 0,
                 lineTotal: total,
               },
             },
@@ -422,11 +432,61 @@ async function main() {
     ],
   });
 
+  // ---- Client accounts: link two existing customers to CLIENT logins ----
+  const clientSeed = [
+    { customer: customers[0], email: "manisha@client.com" },
+    { customer: customers[1], email: "deepak@client.com" },
+  ];
+  for (const c of clientSeed) {
+    await prisma.user.create({
+      data: {
+        name: `${c.customer.firstName} ${c.customer.lastName ?? ""}`.trim(),
+        email: c.email,
+        passwordHash,
+        role: Role.CLIENT,
+        phone: c.customer.phone,
+        customerProfile: { connect: { id: c.customer.id } },
+      },
+    });
+  }
+
+  // ---- Reviews: seed ratings on a subset of completed appointments ----
+  const comments = [
+    "Absolutely lovely experience, highly recommend!",
+    "Very professional and friendly. Will be back.",
+    "Great attention to detail. Left feeling fantastic.",
+    "Good service, comfortable atmosphere.",
+    "Exactly what I wanted — thank you!",
+    null,
+    null,
+  ];
+  let reviewIdx = 0;
+  for (const c of completedForReview) {
+    // Review roughly two-thirds of completed visits.
+    if (reviewIdx % 3 === 0) {
+      reviewIdx++;
+      continue;
+    }
+    await prisma.review.create({
+      data: {
+        customerId: c.customerId,
+        staffId: c.staffId,
+        appointmentId: c.apptId,
+        serviceId: c.serviceId,
+        rating: 4 + (reviewIdx % 2), // 4 or 5
+        comment: pick(comments, reviewIdx),
+        createdAt: addMinutes(c.end, 120),
+      },
+    });
+    reviewIdx++;
+  }
+
   console.log("✅  Seed complete.");
   console.log("\nLogin credentials (password: Password123!):");
   console.log("  Admin:    admin@glowandgo.com");
   console.log("  Manager:  manager@glowandgo.com");
   console.log("  Team:     sita@glowandgo.com");
+  console.log("  Client:   manisha@client.com");
 }
 
 main()

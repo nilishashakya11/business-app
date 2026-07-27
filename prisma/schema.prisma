@@ -19,6 +19,7 @@ enum Role {
   ADMIN
   MANAGER // Manager / Receptionist
   TEAM_MEMBER
+  CLIENT // Self-serve customer with an online account
 }
 
 enum AppointmentStatus {
@@ -174,6 +175,7 @@ model User {
 
   branches        UserBranch[]
   staffProfile    Staff?
+  customerProfile Customer?        @relation("CustomerUser")
   accounts        Account[]
   sessions        Session[]
   permissions     UserPermission[]
@@ -277,6 +279,7 @@ model Staff {
   services      StaffService[]
   commissions   Commission[]
   attendance    Attendance[]
+  reviews       Review[]
 
   @@index([branchId])
 }
@@ -365,6 +368,7 @@ model Service {
   staff        StaffService[]
   addOns       ServiceAddOn[]
   appointments AppointmentService[]
+  reviews      Review[]
 
   @@index([branchId])
   @@index([categoryId])
@@ -397,6 +401,7 @@ model StaffService {
 model Customer {
   id            String    @id @default(cuid())
   businessId    String    // shared across branches
+  userId        String?   @unique // linked account for self-serve clients
   firstName     String
   lastName      String?
   email         String?
@@ -410,10 +415,12 @@ model Customer {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  user         User?             @relation("CustomerUser", fields: [userId], references: [id], onDelete: SetNull)
   appointments Appointment[]
   invoices     Invoice[]
   memberships  Membership[]
   packages     CustomerPackage[]
+  reviews      Review[]
 
   @@index([businessId])
   @@index([phone])
@@ -496,6 +503,7 @@ model Appointment {
   staff    Staff?               @relation(fields: [staffId], references: [id], onDelete: SetNull)
   services AppointmentService[]
   invoice  Invoice?
+  reviews  Review[]
 
   @@index([branchId, startTime])
   @@index([staffId])
@@ -514,6 +522,31 @@ model AppointmentService {
   service     Service     @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@index([appointmentId])
+}
+
+// ------------------------------------------------------------------
+// Reviews
+// ------------------------------------------------------------------
+
+model Review {
+  id            String   @id @default(cuid())
+  customerId    String
+  staffId       String
+  appointmentId String?  @unique
+  serviceId     String?
+  rating        Int      // 1..5
+  comment       String?
+  status        String   @default("APPROVED") // APPROVED | PENDING | HIDDEN
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  customer    Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  staff       Staff       @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  service     Service?    @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([staffId])
+  @@index([serviceId])
 }
 
 // ------------------------------------------------------------------
