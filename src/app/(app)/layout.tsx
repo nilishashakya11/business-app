@@ -9,6 +9,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { role, branchIds, primaryBranchId } = session.user;
 
+  // Clients don't belong in the business back-office; send them to booking.
+  if (role === "CLIENT") redirect("/book");
+
   // Admins can see every active branch; others only their assignments.
   const branches = await prisma.branch.findMany({
     where: role === "ADMIN" ? { isActive: true } : { id: { in: branchIds }, isActive: true },

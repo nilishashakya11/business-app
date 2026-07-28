@@ -16,7 +16,8 @@ export default withAuth(
 );
 
 export const config = {
-  // Protect the app shell; leave auth, api/auth and static assets open.
+  // Protect the app shell and client portal; leave auth, api/auth, the public
+  // marketing/booking-browse and static assets open.
   matcher: [
     "/dashboard/:path*",
     "/calendar/:path*",
@@ -27,5 +28,7 @@ export const config = {
     "/inventory/:path*",
     "/reports/:path*",
     "/settings/:path*",
+    "/reviews/:path*",
+    "/my-bookings/:path*",
   ],
 };

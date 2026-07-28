@@ -44,6 +44,10 @@ export const PERMISSIONS = {
   USERS_MANAGE: "users.manage",
   BRANCHES_MANAGE: "branches.manage",
   PAYMENTS_CONFIGURE: "payments.configure",
+
+  // Client portal (self-serve customers)
+  BOOKING_SELF_SERVE: "booking.self_serve",
+  REVIEW_CREATE: "review.create",
 } as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -77,6 +81,7 @@ const ROLE_PERMISSIONS: Record<Role, PermissionKey[]> = {
     PERMISSIONS.SERVICE_VIEW,
     PERMISSIONS.STAFF_VIEW_OWN_METRICS,
   ],
+  CLIENT: [PERMISSIONS.BOOKING_SELF_SERVE, PERMISSIONS.REVIEW_CREATE],
 };
 
 /** Check if a role has a given permission by default. */

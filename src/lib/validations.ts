@@ -13,6 +13,67 @@ export const registerSchema = z.object({
   phone: z.string().optional(),
 });
 
+// ---- Client self-serve signup ----
+export const clientSignupSchema = z.object({
+  name: z.string().min(2, "Enter your full name"),
+  email: z.string().email(),
+  phone: z.string().optional(),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+// ---- Business onboarding (Fresha-style registration) ----
+export const businessOnboardingSchema = z.object({
+  // Owner account
+  ownerName: z.string().min(2, "Enter your name"),
+  email: z.string().email(),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  phone: z.string().optional(),
+  // Business
+  businessName: z.string().min(2, "Enter your business name"),
+  currency: z.string().default("NPR"),
+  timezone: z.string().default("Asia/Kathmandu"),
+  // First branch / location
+  branchName: z.string().min(1, "Enter a location name"),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  branchPhone: z.string().optional(),
+  // Optional starter services created during onboarding
+  services: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        durationMinutes: z.coerce.number().int().min(5).default(30),
+        price: z.coerce.number().min(0).default(0),
+      }),
+    )
+    .default([]),
+});
+
+// ---- Reviews ----
+export const reviewSchema = z.object({
+  appointmentId: z.string().min(1),
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: z.string().max(1000).optional(),
+});
+
+// ---- Online booking (client self-serve) ----
+export const onlineBookingSchema = z.object({
+  branchId: z.string().min(1),
+  staffId: z.string().min(1, "Choose a team member"),
+  serviceIds: z.array(z.string()).min(1, "Select at least one service"),
+  startTime: z.string().datetime(),
+  notes: z.string().optional(),
+  // Guest details when the booker has no account
+  guest: z
+    .object({
+      firstName: z.string().min(1),
+      lastName: z.string().optional(),
+      email: z.string().email().optional().or(z.literal("")),
+      phone: z.string().optional(),
+    })
+    .optional(),
+});
+
 // ---- Customers ----
 export const customerSchema = z.object({
   firstName: z.string().min(1),
@@ -172,3 +233,7 @@ export type StaffInput = z.infer<typeof staffSchema>;
 export type InvoiceInput = z.infer<typeof invoiceSchema>;
 export type ProductInput = z.infer<typeof productSchema>;
 export type StockAdjustmentInput = z.infer<typeof stockAdjustmentSchema>;
+export type ClientSignupInput = z.infer<typeof clientSignupSchema>;
+export type BusinessOnboardingInput = z.infer<typeof businessOnboardingSchema>;
+export type ReviewInput = z.infer<typeof reviewSchema>;
+export type OnlineBookingInput = z.infer<typeof onlineBookingSchema>;

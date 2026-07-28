@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Loader2, AlertCircle } from "lucide-react";
@@ -17,7 +18,8 @@ const DEMO_ACCOUNTS = [
 export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
+  // Default to "/" so the role-aware home route sends the user to the right place.
+  const callbackUrl = params.get("callbackUrl") ?? "/";
 
   const [email, setEmail] = useState("admin@glowandgo.com");
   const [password, setPassword] = useState("Password123!");
@@ -89,6 +91,13 @@ export function LoginForm() {
         {loading && <Loader2 className="size-4 animate-spin" />}
         {loading ? "Signing in..." : "Sign in"}
       </Button>
+
+      <p className="text-center text-sm text-muted-foreground">
+        New here?{" "}
+        <Link href="/choose" className="font-medium text-primary hover:underline">
+          Create an account
+        </Link>
+      </p>
 
       <div className="rounded-lg border bg-muted/30 p-3">
         <p className="mb-2 text-xs font-medium text-muted-foreground">
