@@ -26,6 +26,21 @@ export function toDateInput(date: Date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
+/** Add days to a date, returning a new Date (does not mutate). */
+export function addDays(date: Date, days: number) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+/** Return midnight on the Sunday that starts the week containing `date`. */
+export function startOfWeek(date: Date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - d.getDay()); // 0 = Sunday
+  return d;
+}
+
 /** Format a date for display. */
 export function formatDate(date: Date | string, opts?: Intl.DateTimeFormatOptions) {
   const d = typeof date === "string" ? new Date(date) : date;
