@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Trash2, Check } from "lucide-react";
+import { Loader2, Trash2, Check, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,8 +72,19 @@ export function AppointmentForm({
   const { toast } = useToast();
   const editing = Boolean(appointment);
 
+  // Local, mutable copy so a quick-added client shows up immediately.
+  const [customerList, setCustomerList] = React.useState<CustomerOption[]>(customers);
   const [customerId, setCustomerId] = React.useState(appointment?.customerId ?? "");
   const [staffId, setStaffId] = React.useState(appointment?.staffId ?? "");
+
+  // Quick-add client state
+  const [addingClient, setAddingClient] = React.useState(false);
+  const [newFirst, setNewFirst] = React.useState("");
+  const [newLast, setNewLast] = React.useState("");
+  const [newPhone, setNewPhone] = React.useState("");
+  const [newEmail, setNewEmail] = React.useState("");
+  const [creatingClient, setCreatingClient] = React.useState(false);
+
   const [startTime, setStartTime] = React.useState(
     appointment?.startTime
       ? toLocalInput(new Date(appointment.startTime))
@@ -152,6 +163,46 @@ export function AppointmentForm({
     }
   }
 
+  async function createClient() {
+    if (newFirst.trim().length === 0) {
+      toast({ title: "Enter the client's first name", variant: "error" });
+      return;
+    }
+    setCreatingClient(true);
+    try {
+      const { customer } = await apiFetch<{ customer: { id: string; firstName: string; lastName: string | null } }>(
+        "/api/customers",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            firstName: newFirst,
+            lastName: newLast || undefined,
+            phone: newPhone || undefined,
+            email: newEmail || undefined,
+          }),
+        },
+      );
+      const name = `${customer.firstName} ${customer.lastName ?? ""}`.trim();
+      // Add to the list and select it so booking continues uninterrupted.
+      setCustomerList((prev) => [{ id: customer.id, name }, ...prev]);
+      setCustomerId(customer.id);
+      setAddingClient(false);
+      setNewFirst("");
+      setNewLast("");
+      setNewPhone("");
+      setNewEmail("");
+      toast({ title: "Client added", variant: "success" });
+    } catch (err) {
+      toast({
+        title: "Couldn't add client",
+        description: err instanceof Error ? err.message : undefined,
+        variant: "error",
+      });
+    } finally {
+      setCreatingClient(false);
+    }
+  }
+
   return (
     <FormPageShell
       title={editing ? "Edit appointment" : "New appointment"}
@@ -178,13 +229,22 @@ export function AppointmentForm({
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Customer</Label>
+            <div className="flex items-center justify-between">
+              <Label>Customer</Label>
+              <button
+                type="button"
+                onClick={() => setAddingClient((v) => !v)}
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                {addingClient ? "Cancel" : "+ New client"}
+              </button>
+            </div>
             <Select value={customerId} onValueChange={setCustomerId}>
               <SelectTrigger>
                 <SelectValue placeholder="Walk-in" />
               </SelectTrigger>
               <SelectContent>
-                {customers.map((c) => (
+                {customerList.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}
                   </SelectItem>
@@ -208,6 +268,25 @@ export function AppointmentForm({
             </Select>
           </div>
         </div>
+
+        {/* Quick-add client — create a new client inline without leaving booking */}
+        {addingClient && (
+          <div className="space-y-3 rounded-lg border border-dashed bg-muted/30 p-3">
+            <p className="text-xs font-medium text-muted-foreground">Add a new client</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Input placeholder="First name" value={newFirst} onChange={(e) => setNewFirst(e.target.value)} />
+              <Input placeholder="Last name" value={newLast} onChange={(e) => setNewLast(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Input placeholder="Phone" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} />
+              <Input placeholder="Email" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+            </div>
+            <Button type="button" size="sm" onClick={createClient} disabled={creatingClient}>
+              {creatingClient ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
+              Add &amp; select
+            </Button>
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label htmlFor="startTime">Start time</Label>
