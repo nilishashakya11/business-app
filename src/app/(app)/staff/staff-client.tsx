@@ -86,12 +86,16 @@ export function StaffClient({
                   >
                     {initials(s.name)}
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{s.name}</p>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/staff/${s.id}`)}
+                    className="min-w-0 flex-1 text-left"
+                  >
+                    <p className="truncate font-medium hover:underline">{s.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
                       {s.jobTitle ?? ROLE_LABELS[s.role]}
                     </p>
-                  </div>
+                  </button>
                   {canManage && (
                     <Button
                       variant="ghost"
