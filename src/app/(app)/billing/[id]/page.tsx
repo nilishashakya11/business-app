@@ -111,16 +111,20 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="tabular-nums">{formatCurrency(Number(invoice.subtotal))}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Discount</span>
-                <span className="tabular-nums">
-                  -{formatCurrency(Number(invoice.discountTotal))}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Tax</span>
-                <span className="tabular-nums">{formatCurrency(Number(invoice.taxTotal))}</span>
-              </div>
+              {Number(invoice.discountTotal) > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Discount</span>
+                  <span className="tabular-nums">
+                    -{formatCurrency(Number(invoice.discountTotal))}
+                  </span>
+                </div>
+              )}
+              {Number(invoice.taxTotal) > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Tax</span>
+                  <span className="tabular-nums">{formatCurrency(Number(invoice.taxTotal))}</span>
+                </div>
+              )}
               <div className="flex justify-between border-t pt-1 text-base font-semibold">
                 <span>Total</span>
                 <span className="tabular-nums">{formatCurrency(total)}</span>

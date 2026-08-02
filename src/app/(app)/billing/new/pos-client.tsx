@@ -53,7 +53,6 @@ export function PosClient({
 
   const [customerId, setCustomerId] = React.useState("");
   const [lines, setLines] = React.useState<CartLine[]>([]);
-  const [invoiceDiscount, setInvoiceDiscount] = React.useState(0);
   const [query, setQuery] = React.useState("");
   const [saving, setSaving] = React.useState(false);
 
@@ -85,7 +84,8 @@ export function PosClient({
           quantity: 1,
           unitPrice: item.price,
           discount: 0,
-          taxRate: item.taxRate,
+          // Charge exactly the listed price — no tax added at checkout.
+          taxRate: 0,
         },
       ];
     });
@@ -107,9 +107,9 @@ export function PosClient({
           discount: l.discount,
           taxRate: l.taxRate,
         })),
-        invoiceDiscount,
+        0,
       ),
-    [lines, invoiceDiscount],
+    [lines],
   );
 
   async function checkout() {
@@ -133,7 +133,7 @@ export function PosClient({
             discount: l.discount,
             taxRate: l.taxRate,
           })),
-          discountTotal: invoiceDiscount,
+          discountTotal: 0,
         }),
       });
       toast({ title: "Invoice created", variant: "success" });
@@ -215,7 +215,7 @@ export function PosClient({
                       <Trash2 className="size-3.5" />
                     </button>
                   </div>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
+                  <div className="mt-2 grid grid-cols-2 gap-2">
                     <div>
                       <span className="text-[10px] text-muted-foreground">Qty</span>
                       <Input
@@ -238,16 +238,6 @@ export function PosClient({
                         className="h-8"
                       />
                     </div>
-                    <div>
-                      <span className="text-[10px] text-muted-foreground">Disc</span>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={l.discount}
-                        onChange={(e) => updateLine(l.key, { discount: Number(e.target.value) })}
-                        className="h-8"
-                      />
-                    </div>
                   </div>
                   <p className="mt-1 text-right text-xs text-muted-foreground">
                     {formatCurrency(computeLine(l).lineTotal)}
@@ -262,20 +252,6 @@ export function PosClient({
               <span className="text-muted-foreground">Subtotal</span>
               <span className="tabular-nums">{formatCurrency(totals.subtotal)}</span>
             </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Tax</span>
-              <span className="tabular-nums">{formatCurrency(totals.taxTotal)}</span>
-            </div>
-            <div className="flex items-center justify-between gap-2 text-sm">
-              <span className="text-muted-foreground">Extra discount</span>
-              <Input
-                type="number"
-                step="0.01"
-                value={invoiceDiscount}
-                onChange={(e) => setInvoiceDiscount(Math.max(0, Number(e.target.value)))}
-                className="h-8 w-28 text-right"
-              />
-            </div>
             <div className="flex items-center justify-between border-t pt-2 text-base font-semibold">
               <span>Total</span>
               <span className="tabular-nums">{formatCurrency(totals.total)}</span>
@@ -284,7 +260,7 @@ export function PosClient({
 
           <Button className="w-full" onClick={checkout} disabled={saving}>
             {saving ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
-            Create invoice
+            Checkout
           </Button>
         </CardContent>
       </Card>
