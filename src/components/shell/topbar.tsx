@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 interface TopbarProps {
   user: { name: string; email: string; role: string };
+  business: { name: string; logoUrl: string | null };
   onMenu: () => void;
 }
 
@@ -28,7 +29,7 @@ const ROLE_LABEL: Record<string, string> = {
   TEAM_MEMBER: "Team member",
 };
 
-export function Topbar({ user, onMenu }: TopbarProps) {
+export function Topbar({ user, business, onMenu }: TopbarProps) {
   const { branches, activeBranch, activeBranchId, setActiveBranchId } = useBranch();
 
   return (
@@ -41,18 +42,18 @@ export function Topbar({ user, onMenu }: TopbarProps) {
         <Menu className="size-5" />
       </button>
 
-      {/* Branch switcher */}
-      {branches.length > 0 && (
+      {/* Branch switcher — only shown to businesses with more than one location */}
+      {branches.length > 1 ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
               <Store className="size-4 text-muted-foreground" strokeWidth={1.75} />
-              <span className="max-w-[10rem] truncate">{activeBranch?.name ?? "Select branch"}</span>
+              <span className="max-w-[10rem] truncate">{activeBranch?.name ?? "Select location"}</span>
               <ChevronDown className="size-3.5 opacity-60" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuLabel>Branches</DropdownMenuLabel>
+            <DropdownMenuLabel>Locations</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {branches.map((b) => (
               <DropdownMenuItem
@@ -71,6 +72,12 @@ export function Topbar({ user, onMenu }: TopbarProps) {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+      ) : (
+        // Single-location business: just show the business name as context.
+        <div className="hidden items-center gap-2 text-sm font-medium text-muted-foreground sm:flex">
+          <Store className="size-4" strokeWidth={1.75} />
+          <span className="max-w-[14rem] truncate">{business.name}</span>
+        </div>
       )}
 
       <div className="ml-auto flex items-center gap-1.5">

@@ -18,6 +18,7 @@ export interface AuthedContext {
   permissions: string[];
   branchIds: string[];
   primaryBranchId: string | null;
+  businessId: string | null;
 }
 
 /** Require an authenticated session. Throws ApiError(401) if absent. */
@@ -32,6 +33,7 @@ export async function requireAuth(): Promise<AuthedContext> {
     permissions: session.user.permissions,
     branchIds: session.user.branchIds,
     primaryBranchId: session.user.primaryBranchId,
+    businessId: session.user.businessId,
   };
 }
 

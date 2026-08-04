@@ -47,3 +47,6 @@ next-env.d.ts
 .claude/
 # local dev server log
 devserver.log
+
+# claude code session transcript dumps
+*this-session-is-being-continued*.txt

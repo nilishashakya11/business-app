@@ -68,34 +68,37 @@ async function main() {
     prisma.business.deleteMany(),
   ]);
 
-  // Business + branches
+  // Business + branches. Glow & Go is the PLATFORM; this is a demo tenant
+  // (a real salon that uses the platform), so it has its own brand + slug.
   const business = await prisma.business.create({
     data: {
-      name: "Glow & Go Wellness",
+      name: "Serenity Spa & Salon",
+      slug: "serenity-spa",
       currency: "NPR",
       timezone: "Asia/Kathmandu",
+      tagline: "Hair, beauty & wellness in the heart of Kathmandu",
     },
   });
 
   const branchMain = await prisma.branch.create({
     data: {
       businessId: business.id,
-      name: "Thamel Flagship",
+      name: "Thamel",
       address: "Thamel Marg",
       city: "Kathmandu",
       phone: "+977-1-4000001",
-      email: "thamel@glowandgo.com",
+      email: "thamel@serenityspa.com",
     },
   });
 
   const branchLalitpur = await prisma.branch.create({
     data: {
       businessId: business.id,
-      name: "Lalitpur Studio",
+      name: "Jhamsikhel",
       address: "Jhamsikhel",
       city: "Lalitpur",
       phone: "+977-1-4000002",
-      email: "lalitpur@glowandgo.com",
+      email: "lalitpur@serenityspa.com",
     },
   });
 
@@ -139,10 +142,10 @@ async function main() {
 
   // Team members (also staff)
   const staffSeed = [
-    { name: "Sita Gurung", email: "sita@glowandgo.com", branch: branchMain, title: "Senior Stylist", color: "#8b5cf6", commission: 15 },
-    { name: "Ramesh K.C.", email: "ramesh@glowandgo.com", branch: branchMain, title: "Barber", color: "#06b6d4", commission: 12 },
-    { name: "Puja Maharjan", email: "puja@glowandgo.com", branch: branchLalitpur, title: "Beautician", color: "#f59e0b", commission: 14 },
-    { name: "Nabin Rai", email: "nabin@glowandgo.com", branch: branchLalitpur, title: "Massage Therapist", color: "#10b981", commission: 18 },
+    { name: "Sita Gurung", email: "sita@glowandgo.com", branch: branchMain, title: "Senior Stylist", color: "#a8754e", commission: 15 },
+    { name: "Ramesh K.C.", email: "ramesh@glowandgo.com", branch: branchMain, title: "Barber", color: "#7d8b5a", commission: 12 },
+    { name: "Puja Maharjan", email: "puja@glowandgo.com", branch: branchLalitpur, title: "Beautician", color: "#c08552", commission: 14 },
+    { name: "Nabin Rai", email: "nabin@glowandgo.com", branch: branchLalitpur, title: "Massage Therapist", color: "#9c5a3c", commission: 18 },
   ];
 
   const staffRecords = [];
@@ -481,12 +484,85 @@ async function main() {
     reviewIdx++;
   }
 
+  // ---- Second demo tenant: proves the platform is multi-business ----
+  // A separate salon with its own owner, branch, services and staff — fully
+  // isolated from Serenity Spa. Confirms "Glow & Go" is the platform, not a shop.
+  const business2 = await prisma.business.create({
+    data: {
+      name: "Urban Edge Barbershop",
+      slug: "urban-edge",
+      currency: "NPR",
+      timezone: "Asia/Kathmandu",
+      tagline: "Sharp cuts & classic grooming",
+    },
+  });
+  const branch2 = await prisma.branch.create({
+    data: {
+      businessId: business2.id,
+      name: "Baneshwor",
+      address: "New Baneshwor",
+      city: "Kathmandu",
+      phone: "+977-1-4111222",
+      email: "hello@urbanedge.com",
+    },
+  });
+  await prisma.user.create({
+    data: {
+      name: "Kabir Malla",
+      email: "owner@urbanedge.com",
+      passwordHash,
+      role: Role.ADMIN,
+      phone: "+977-9800001111",
+      branches: { create: [{ branchId: branch2.id, isPrimary: true }] },
+    },
+  });
+  const barber = await prisma.user.create({
+    data: {
+      name: "Dinesh Shrestha",
+      email: "dinesh@urbanedge.com",
+      passwordHash,
+      role: Role.TEAM_MEMBER,
+      branches: { create: [{ branchId: branch2.id, isPrimary: true }] },
+      staffProfile: {
+        create: {
+          branchId: branch2.id,
+          jobTitle: "Master Barber",
+          color: "#6f5643",
+          commissionRate: 15,
+          hiredAt: daysAgo(120),
+          workingHours: {
+            create: Array.from({ length: 7 }, (_, day) => ({
+              dayOfWeek: day,
+              startTime: "10:00",
+              endTime: "19:00",
+              isOff: day === 1, // Monday off
+            })),
+          },
+        },
+      },
+    },
+    include: { staffProfile: true },
+  });
+  const ue = await prisma.service.create({
+    data: { branchId: branch2.id, name: "Signature Cut", durationMinutes: 45, price: 900, taxRate: 0 },
+  });
+  await prisma.service.create({
+    data: { branchId: branch2.id, name: "Hot Towel Shave", durationMinutes: 30, price: 650, taxRate: 0 },
+  });
+  await prisma.staffService.create({
+    data: { staffId: barber.staffProfile!.id, serviceId: ue.id },
+  });
+
   console.log("✅  Seed complete.");
   console.log("\nLogin credentials (password: Password123!):");
-  console.log("  Admin:    admin@glowandgo.com");
-  console.log("  Manager:  manager@glowandgo.com");
-  console.log("  Team:     sita@glowandgo.com");
-  console.log("  Client:   manisha@client.com");
+  console.log("  Serenity Spa (tenant 1):");
+  console.log("    Admin:    admin@glowandgo.com");
+  console.log("    Manager:  manager@glowandgo.com");
+  console.log("    Team:     sita@glowandgo.com");
+  console.log("    Client:   manisha@client.com");
+  console.log("  Urban Edge (tenant 2):");
+  console.log("    Owner:    owner@urbanedge.com");
+  console.log("\nPublic booking links: /book/serenity-spa  ·  /book/urban-edge");
 }
 
 main()

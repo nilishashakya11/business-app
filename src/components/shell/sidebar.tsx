@@ -53,12 +53,13 @@ const NAV: NavItem[] = [
 ];
 
 interface SidebarProps {
+  business: { name: string; logoUrl: string | null };
   permissions: string[];
   open: boolean;
   onClose: () => void;
 }
 
-export function Sidebar({ permissions, open, onClose }: SidebarProps) {
+export function Sidebar({ business, permissions, open, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   const items = NAV.filter(
@@ -83,11 +84,23 @@ export function Sidebar({ permissions, open, onClose }: SidebarProps) {
         )}
       >
         <div className="flex h-16 items-center justify-between border-b px-5">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <span className="font-display text-base font-bold">G</span>
+          <Link href="/dashboard" className="flex min-w-0 items-center gap-2.5">
+            <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary text-primary-foreground">
+              {business.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={business.logoUrl} alt="" className="size-full object-cover" />
+              ) : (
+                <span className="font-display text-base font-bold">
+                  {business.name.charAt(0).toUpperCase()}
+                </span>
+              )}
             </div>
-            <span className="font-display text-base font-semibold tracking-tight">Glow &amp; Go</span>
+            <div className="min-w-0">
+              <span className="block truncate font-display text-sm font-semibold tracking-tight">
+                {business.name}
+              </span>
+              <span className="block text-[10px] text-muted-foreground">Powered by Glow &amp; Go</span>
+            </div>
           </Link>
           <button
             onClick={onClose}
@@ -128,7 +141,7 @@ export function Sidebar({ permissions, open, onClose }: SidebarProps) {
         </nav>
 
         <div className="border-t p-3">
-          <p className="px-3 text-[11px] text-muted-foreground">v1.0 &middot; Kathmandu</p>
+          <p className="px-3 text-[11px] text-muted-foreground">Glow &amp; Go &middot; v1.0</p>
         </div>
       </aside>
     </>

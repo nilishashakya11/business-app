@@ -89,3 +89,13 @@ export function initials(name: string) {
     .join("")
     .toUpperCase();
 }
+
+/** Turn a business name into a URL-safe slug, e.g. "Serenity Spa!" -> "serenity-spa". */
+export function slugify(input: string) {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+}

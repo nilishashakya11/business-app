@@ -1,9 +1,12 @@
 # Glow & Go — Business Management Platform
 
-A Fresha-inspired, full-stack management platform for appointment-based businesses
-(salons, spas, clinics, barbershops). It covers the daily operational loop — booking,
-billing, customers, team, inventory — plus multi-branch support, role-based access
-control, and an analytics dashboard with exportable reports.
+A Fresha-inspired, full-stack, **multi-tenant** platform for appointment-based
+businesses (salons, spas, clinics, barbershops). Each business gets its own branded
+workspace — its name, logo and locations — on top of a shared platform. Staff run the
+daily operational loop (booking, billing, customers, team, inventory) while clients
+book themselves online, leave reviews and manage their own accounts. Multi-branch
+support, role-based access control, and an analytics dashboard with exportable reports
+round it out.
 
 Built with Next.js 15 (App Router), TypeScript, Prisma, PostgreSQL, Tailwind CSS,
 and NextAuth.
@@ -30,10 +33,20 @@ and NextAuth.
 ## Features
 
 **Appointments**
-- Day-view calendar with a time grid and color-coded blocks per team member
-- Booking dialog with multi-service selection (duration and price auto-computed)
+- Day-view calendar with a per-staff column layout and a live-updating time grid
+- Booking dialog with multi-service selection (duration and price auto-computed) and
+  quick-add of a new client without leaving the flow
 - Status tracking (booked → confirmed → arrived → in progress → completed, plus
   cancelled / no-show / waitlist)
+
+**Online booking & client accounts**
+- Public self-booking wizard at `/book` — choose a service, team member and time
+- Clients sign up at `/client/signup` and get their own portal to book and track visits
+- Walk-in clients can be quick-added mid-booking from the staff calendar
+
+**Reviews & ratings**
+- Clients rate completed visits, with separate ratings for the staff member and service
+- Ratings roll up per staff member and per service
 
 **Customers**
 - Directory with search, profiles, loyalty points, notes
@@ -65,9 +78,12 @@ and NextAuth.
   performance, top services, cancellation rate
 - Export to CSV and Excel (`.xlsx`)
 
-**Multi-branch**
-- Shared customer database across branches
-- Branch switcher in the top bar; data is scoped to the active branch
+**Multi-tenant & multi-branch**
+- Each business is an isolated tenant with its own branding (name, logo, tagline)
+  shown across the app shell; new businesses self-register at `/register`
+- Shared customer database across a business's branches
+- Branch/location switcher in the top bar (shown when a business has more than one
+  location); data is scoped to the active branch
 - Admins can access all branches; other users see only assigned branches
 
 **Platform**
@@ -155,10 +171,12 @@ permissions, branches, staff, services, customers, appointments, invoices,
 payments, refunds, inventory, suppliers, memberships, packages, notifications,
 and audit logs.
 
-`npm run db:seed` creates a demo business, **Glow & Go Wellness**, with two branches
-(Thamel Flagship, Lalitpur Studio), users for each role, staff with working hours,
-services, customers, and ~60 days of appointments, invoices, payments, commissions,
-and stock — enough to populate the dashboard and reports out of the box.
+`npm run db:seed` creates two demo tenants to show the platform is multi-business:
+**Serenity Spa & Salon** (two locations — Thamel, Jhamsikhel) with users for every
+role, staff and working hours, services, customers, client logins, reviews, and ~60
+days of appointments, invoices, payments, commissions and stock; plus **Urban Edge
+Barbershop**, a second, fully isolated business with its own owner, staff and services
+— enough to populate the dashboard and reports out of the box.
 
 > The seed wipes existing data first. Use it only against a development database.
 
@@ -198,13 +216,26 @@ The app container syncs the schema, seeds, and starts the dev server automatical
 
 All demo users share the password **`Password123!`**.
 
+**Serenity Spa & Salon** — the primary demo tenant:
+
 | Role        | Email                    | Access                                             |
 | ----------- | ------------------------ | -------------------------------------------------- |
 | Admin       | `admin@glowandgo.com`    | Full access, all branches, settings                |
 | Manager     | `manager@glowandgo.com`  | Bookings, customers, billing, staff, inventory     |
 | Team member | `sita@glowandgo.com`     | Own schedule, appointment status, own metrics      |
+| Client      | `manisha@client.com`     | Client portal — book online, view visit history    |
 
-Other team members: `ramesh@`, `puja@`, `nabin@` `glowandgo.com`.
+Other Serenity team members: `ramesh@`, `puja@`, `nabin@glowandgo.com`; second client `deepak@client.com`.
+
+**Urban Edge Barbershop** — a second tenant that proves data is isolated per business:
+
+| Role   | Email                  | Access                         |
+| ------ | ---------------------- | ------------------------------ |
+| Owner  | `owner@urbanedge.com`  | Full access to Urban Edge only |
+| Barber | `dinesh@urbanedge.com` | Own schedule at Urban Edge     |
+
+New businesses can self-register at **`/register`**; clients can sign up at
+**`/client/signup`** and book through the public portal at **`/book`**.
 
 ---
 
@@ -219,6 +250,8 @@ defaults.
   services, inventory, and branch reports.
 - **Team member** — view own schedule, update appointment status, view own
   performance, limited profile management.
+- **Client** — self-service only: book through the public portal, view their own
+  upcoming and past visits, and leave reviews. No access to the staff app.
 
 Server routes enforce permissions via `requirePermission(...)`; the sidebar hides
 sections a user can't access; branch access is checked on every scoped query.
@@ -233,9 +266,12 @@ prisma/
   seed.ts                # demo data
 src/
   app/
-    (app)/               # authenticated app (dashboard, calendar, customers, ...)
+    (app)/               # authenticated staff app (dashboard, calendar, customers, ...)
+    (client)/book/       # public online booking wizard
     api/                 # route handlers (REST-ish, Zod-validated)
     login/               # sign-in
+    register/            # business onboarding wizard
+    client/signup/       # client account signup
     layout.tsx           # root layout + fonts + providers
   components/
     ui/                  # design-system primitives (button, card, dialog, ...)

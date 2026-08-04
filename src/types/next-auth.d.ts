@@ -13,6 +13,10 @@ declare module "next-auth" {
       permissions: string[];
       branchIds: string[];
       primaryBranchId: string | null;
+      businessId: string | null;
+      businessName: string | null;
+      businessSlug: string | null;
+      businessLogoUrl: string | null;
     };
   }
 }
@@ -23,5 +27,9 @@ declare module "next-auth/jwt" {
     overrides: Record<string, boolean>;
     branchIds: string[];
     primaryBranchId: string | null;
+    businessId: string | null;
+    businessName: string | null;
+    businessSlug: string | null;
+    businessLogoUrl: string | null;
   }
 }

@@ -26,7 +26,9 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email.toLowerCase() },
           include: {
             permissions: { include: { permission: true } },
-            branches: true,
+            branches: { include: { branch: { select: { businessId: true } } } },
+            staffProfile: { select: { branch: { select: { businessId: true } } } },
+            customerProfile: { select: { businessId: true } },
           },
         });
 
@@ -45,6 +47,20 @@ export const authOptions: NextAuthOptions = {
           overrides[up.permission.key] = up.granted;
         }
 
+        // Resolve the tenant this user belongs to (business owner/staff via a
+        // branch, or a client via their customer profile).
+        const businessId =
+          user.branches[0]?.branch.businessId ??
+          user.staffProfile?.branch.businessId ??
+          user.customerProfile?.businessId ??
+          null;
+        const business = businessId
+          ? await prisma.business.findUnique({
+              where: { id: businessId },
+              select: { name: true, slug: true, logoUrl: true },
+            })
+          : null;
+
         return {
           id: user.id,
           name: user.name,
@@ -57,6 +73,10 @@ export const authOptions: NextAuthOptions = {
             user.branches.find((b) => b.isPrimary)?.branchId ??
             user.branches[0]?.branchId ??
             null,
+          businessId,
+          businessName: business?.name ?? null,
+          businessSlug: business?.slug ?? null,
+          businessLogoUrl: business?.logoUrl ?? null,
         } as never;
       },
     }),
@@ -70,11 +90,19 @@ export const authOptions: NextAuthOptions = {
           overrides: Record<string, boolean>;
           branchIds: string[];
           primaryBranchId: string | null;
+          businessId: string | null;
+          businessName: string | null;
+          businessSlug: string | null;
+          businessLogoUrl: string | null;
         };
         token.role = u.role;
         token.overrides = u.overrides;
         token.branchIds = u.branchIds;
         token.primaryBranchId = u.primaryBranchId;
+        token.businessId = u.businessId;
+        token.businessName = u.businessName;
+        token.businessSlug = u.businessSlug;
+        token.businessLogoUrl = u.businessLogoUrl;
       }
       return token;
     },
@@ -84,6 +112,10 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as Role;
         session.user.branchIds = (token.branchIds as string[]) ?? [];
         session.user.primaryBranchId = (token.primaryBranchId as string | null) ?? null;
+        session.user.businessId = (token.businessId as string | null) ?? null;
+        session.user.businessName = (token.businessName as string | null) ?? null;
+        session.user.businessSlug = (token.businessSlug as string | null) ?? null;
+        session.user.businessLogoUrl = (token.businessLogoUrl as string | null) ?? null;
         const overrides = (token.overrides as Record<string, boolean>) ?? {};
         session.user.permissions = Array.from(
           resolvePermissions(token.role as Role, overrides),

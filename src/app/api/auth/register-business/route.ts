@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { handle, ApiError } from "@/lib/api-auth";
 import { businessOnboardingSchema } from "@/lib/validations";
 import { PERMISSIONS } from "@/lib/rbac";
+import { slugify } from "@/lib/utils";
 import { Role } from "@prisma/client";
 
 /**
@@ -20,6 +21,13 @@ export const POST = handle(async (req: NextRequest) => {
 
   const passwordHash = await bcrypt.hash(data.password, 10);
 
+  // Build a unique slug for the business's public booking link.
+  const base = slugify(data.businessName) || "business";
+  let slug = base;
+  for (let i = 2; await prisma.business.findUnique({ where: { slug }, select: { id: true } }); i++) {
+    slug = `${base}-${i}`;
+  }
+
   const result = await prisma.$transaction(async (tx) => {
     // Ensure the permission catalog exists (idempotent).
     await tx.permission.createMany({
@@ -30,6 +38,7 @@ export const POST = handle(async (req: NextRequest) => {
     const business = await tx.business.create({
       data: {
         name: data.businessName,
+        slug,
         currency: data.currency,
         timezone: data.timezone,
       },

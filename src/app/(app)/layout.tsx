@@ -26,6 +26,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         email: session.user.email ?? "",
         role,
       }}
+      business={{
+        name: session.user.businessName ?? "My business",
+        logoUrl: session.user.businessLogoUrl ?? null,
+      }}
       permissions={session.user.permissions}
       branches={branches}
       defaultBranchId={primaryBranchId ?? branches[0]?.id ?? null}

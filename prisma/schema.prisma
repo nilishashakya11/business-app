@@ -121,9 +121,11 @@ enum StockMovementType {
 model Business {
   id        String   @id @default(cuid())
   name      String
+  slug      String   @unique // used for public booking links, e.g. /book/serenity-spa
   currency  String   @default("NPR")
   timezone  String   @default("Asia/Kathmandu")
   logoUrl   String?
+  tagline   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

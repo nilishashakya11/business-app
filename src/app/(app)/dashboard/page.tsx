@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { requireAuth } from "@/lib/api-auth";
 import { resolveActiveBranch } from "@/lib/branch";
+import { prisma } from "@/lib/prisma";
 import { getDashboardData } from "@/lib/queries/dashboard";
 import { PageHeader } from "@/components/shell/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
@@ -23,6 +24,13 @@ export const metadata = { title: "Dashboard — Glow & Go" };
 export default async function DashboardPage() {
   const ctx = await requireAuth();
   const { branchId } = await resolveActiveBranch(ctx);
+  const business = ctx.businessId
+    ? await prisma.business.findUnique({
+        where: { id: ctx.businessId },
+        select: { name: true },
+      })
+    : null;
+  const businessName = business?.name ?? "your business";
 
   if (!branchId) {
     return (
@@ -41,7 +49,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Dashboard" description="Your business at a glance." />
+      <PageHeader
+        title={businessName}
+        description="Here's how your business is doing today."
+      />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
