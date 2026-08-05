@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Users, Mail, Phone } from "lucide-react";
+import { Plus, Search, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { EmptyState } from "@/components/ui/empty-state";
+import { PhoneActions, EmailAction } from "@/components/contact/contact-actions";
 import { initials } from "@/lib/utils";
 
 export interface CustomerRecord {
@@ -132,19 +133,12 @@ export function CustomersClient({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-0.5 text-sm">
-                      {c.phone && (
-                        <p className="flex items-center gap-1.5 text-muted-foreground">
-                          <Phone className="size-3" />
-                          {c.phone}
-                        </p>
-                      )}
-                      {c.email && (
-                        <p className="flex items-center gap-1.5 text-muted-foreground">
-                          <Mail className="size-3" />
-                          {c.email}
-                        </p>
-                      )}
+                    <div
+                      className="flex flex-col gap-0.5 text-sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {c.phone && <PhoneActions phone={c.phone} className="text-muted-foreground" />}
+                      {c.email && <EmailAction email={c.email} className="text-muted-foreground" />}
                       {!c.phone && !c.email && (
                         <span className="text-muted-foreground">—</span>
                       )}

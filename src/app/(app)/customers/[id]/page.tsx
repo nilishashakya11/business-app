@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft, Mail, Phone, MapPin, Cake, Award } from "lucide-react";
+import { ArrowLeft, MapPin, Cake, Award } from "lucide-react";
 import { requireAuth } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
 import { PERMISSIONS } from "@/lib/rbac";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/appointments/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { CalendarDays, Receipt } from "lucide-react";
+import { PhoneActions, EmailAction } from "@/components/contact/contact-actions";
 import { formatCurrency, formatDate, formatTime, initials } from "@/lib/utils";
 
 export default async function CustomerDetailPage({
@@ -60,18 +61,8 @@ export default async function CustomerDetailPage({
         <div className="flex-1">
           <h1 className="font-display text-2xl font-semibold tracking-tight">{fullName}</h1>
           <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-            {customer.phone && (
-              <span className="flex items-center gap-1.5">
-                <Phone className="size-3.5" />
-                {customer.phone}
-              </span>
-            )}
-            {customer.email && (
-              <span className="flex items-center gap-1.5">
-                <Mail className="size-3.5" />
-                {customer.email}
-              </span>
-            )}
+            {customer.phone && <PhoneActions phone={customer.phone} />}
+            {customer.email && <EmailAction email={customer.email} />}
             {customer.address && (
               <span className="flex items-center gap-1.5">
                 <MapPin className="size-3.5" />

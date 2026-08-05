@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StarRating } from "@/components/reviews/star-rating";
+import { PhoneActions, EmailAction } from "@/components/contact/contact-actions";
 import { formatDate, initials } from "@/lib/utils";
 
 export const metadata = { title: "Team member — Glow & Go" };
@@ -159,8 +160,10 @@ export default async function StaffProfilePage({ params }: { params: Promise<{ i
               <CardTitle className="text-base">Contact</CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 text-sm">
-              <p>{staff.user.email}</p>
-              {staff.user.phone && <p className="text-muted-foreground">{staff.user.phone}</p>}
+              <EmailAction email={staff.user.email} className="text-muted-foreground" />
+              {staff.user.phone && (
+                <PhoneActions phone={staff.user.phone} className="text-muted-foreground" />
+              )}
             </CardContent>
           </Card>
         </div>
