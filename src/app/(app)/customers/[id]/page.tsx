@@ -44,6 +44,58 @@ export default async function CustomerDetailPage({
     .filter((i) => i.status === "PAID")
     .reduce((sum, i) => sum + Number(i.total), 0);
 
+  // ---- Lifetime insights (across all appointments, not just the recent 15) ----
+  const [statusGroups, lastCompleted, topServiceRows, topStaffRows] = await Promise.all([
+    prisma.appointment.groupBy({
+      by: ["status"],
+      where: { customerId: id },
+      _count: true,
+    }),
+    prisma.appointment.findFirst({
+      where: { customerId: id, status: "COMPLETED" },
+      orderBy: { startTime: "desc" },
+      select: { startTime: true },
+    }),
+    // Favourite service: most-booked by this customer.
+    prisma.appointmentService.groupBy({
+      by: ["serviceId"],
+      where: { appointment: { customerId: id } },
+      _count: { serviceId: true },
+      orderBy: { _count: { serviceId: "desc" } },
+      take: 1,
+    }),
+    // Favourite team member: most-seen by this customer.
+    prisma.appointment.groupBy({
+      by: ["staffId"],
+      where: { customerId: id, staffId: { not: null } },
+      _count: { staffId: true },
+      orderBy: { _count: { staffId: "desc" } },
+      take: 1,
+    }),
+  ]);
+
+  const statusCount = (s: string) => statusGroups.find((g) => g.status === s)?._count ?? 0;
+  const completedCount = statusCount("COMPLETED");
+  const cancelledCount = statusCount("CANCELLED");
+  const noShowCount = statusCount("NO_SHOW");
+  const totalAppointments = statusGroups.reduce((sum, g) => sum + g._count, 0);
+  const noShowRate = totalAppointments > 0 ? Math.round((noShowCount / totalAppointments) * 100) : 0;
+
+  const [favService, favStaff] = await Promise.all([
+    topServiceRows[0]
+      ? prisma.service.findUnique({
+          where: { id: topServiceRows[0].serviceId },
+          select: { name: true },
+        })
+      : Promise.resolve(null),
+    topStaffRows[0]?.staffId
+      ? prisma.staff.findUnique({
+          where: { id: topStaffRows[0].staffId },
+          select: { user: { select: { name: true } } },
+        })
+      : Promise.resolve(null),
+  ]);
+
   return (
     <div className="space-y-6">
       <Link
@@ -92,9 +144,7 @@ export default async function CustomerDetailPage({
         </Card>
         <Card className="p-4">
           <p className="text-xs text-muted-foreground">Appointments</p>
-          <p className="mt-1 font-display text-lg font-semibold">
-            {customer.appointments.length}
-          </p>
+          <p className="mt-1 font-display text-lg font-semibold">{totalAppointments}</p>
         </Card>
         <Card className="p-4">
           <p className="text-xs text-muted-foreground">Loyalty points</p>
@@ -107,6 +157,28 @@ export default async function CustomerDetailPage({
           </p>
         </Card>
       </div>
+
+      {/* Lifetime insights */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Client insights</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3 lg:grid-cols-6">
+            <Insight label="Completed" value={String(completedCount)} tone="good" />
+            <Insight label="Cancelled" value={String(cancelledCount)} />
+            <Insight label="No-shows" value={String(noShowCount)} tone={noShowCount > 0 ? "warn" : undefined} />
+            <Insight label="No-show rate" value={`${noShowRate}%`} tone={noShowRate >= 20 ? "warn" : undefined} />
+            <Insight label="Favourite service" value={favService?.name ?? "—"} />
+            <Insight label="Usual with" value={favStaff?.user.name ?? "—"} />
+          </div>
+          <p className="mt-4 text-xs text-muted-foreground">
+            {lastCompleted
+              ? `Last visit ${formatDate(lastCompleted.startTime)}`
+              : "No completed visits yet"}
+          </p>
+        </CardContent>
+      </Card>
 
       {customer.notes && (
         <Card>
@@ -188,6 +260,34 @@ export default async function CustomerDetailPage({
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+function Insight({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: "good" | "warn";
+}) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p
+        className={
+          tone === "good"
+            ? "mt-0.5 truncate font-display text-lg font-semibold text-success"
+            : tone === "warn"
+              ? "mt-0.5 truncate font-display text-lg font-semibold text-warning"
+              : "mt-0.5 truncate font-display text-lg font-semibold"
+        }
+        title={value}
+      >
+        {value}
+      </p>
     </div>
   );
 }
