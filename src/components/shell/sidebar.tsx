@@ -121,12 +121,18 @@ export function Sidebar({ business, permissions, open, onClose }: SidebarProps) 
                 href={item.href}
                 onClick={onClose}
                 className={cn(
-                  "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   active
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary"
+                  />
+                )}
                 <Icon
                   className={cn(
                     "size-[18px] transition-colors",
